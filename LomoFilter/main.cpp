@@ -24,11 +24,77 @@ void curveTransform(Mat &img, Mat &lookupTable) {
     }
 }
 
-void drawLightCircle(Mat &halo) {
-    double xCenter = halo.rows / 2.0, yCenter = halo.cols / 2.0;
-    double radius = min(halo.rows, halo.cols) / 3.0;
-    Scalar frontColor(2.0, 2.0, 2.0);
-    Scalar backgroundColor(0.3, 0.3, 0.3);
+void drawCircle(Mat &dst, double radius) {
+    double xCenter = dst.rows / 2.0, yCenter = dst.cols / 2.0;
+    Scalar frontColor(3.0, 3.0, 3.0);
+    Scalar backgroundColor(0.5, 0.5, 0.5);
+
+    for (int i = 0; i < dst.rows; i++) {
+        for (int j = 0; j < dst.cols; j++) {
+            double sqDist = pow(i - xCenter, 2) + pow(j - yCenter, 2);
+            if (sqDist - radius * radius < 0.0001) {
+                dst.at<Vec3f>(i, j)[0] = frontColor[0];
+                dst.at<Vec3f>(i, j)[1] = frontColor[1];
+                dst.at<Vec3f>(i, j)[2] = frontColor[1];
+            } else {
+                dst.at<Vec3f>(i, j)[0] = backgroundColor[0];
+                dst.at<Vec3f>(i, j)[1] = backgroundColor[1];
+                dst.at<Vec3f>(i, j)[2] = backgroundColor[1];
+            }
+        }
+    }
+}
+
+void boxFiltering(Mat &src, Mat &dst, int kernelWidth, int kernelHeight) {
+    if (src.rows != dst.rows && src.cols != dst.cols) {
+        cerr << "boxFiltering:: sizes of two Mat are not same" << endl;
+        return;
+    }
+
+    Mat buf(src.rows, src.cols, src.type());
+
+    int paddingWidth = kernelWidth / 2, paddingHeight = kernelHeight / 2;
+    double kernelSize = kernelWidth * kernelHeight;
+    for (int i = 0; i < src.rows; i++) {
+        for (int j = 0; j < src.cols; j++) {
+
+            for (int startX = i - paddingWidth; startX < i - paddingWidth + kernelWidth; startX++) {
+                if (startX < 0 || startX > src.rows - 1) {
+                    continue;
+                } else {
+                    buf.at<Vec3f>(i, j)[0] += src.at<Vec3f>(startX, j)[0];
+                    buf.at<Vec3f>(i, j)[1] += src.at<Vec3f>(startX, j)[1];
+                    buf.at<Vec3f>(i, j)[2] += src.at<Vec3f>(startX, j)[2];
+                }
+            }
+
+        }
+    }
+    for (int i = 0; i < src.rows; i++) {
+        for (int j = 0; j < src.cols; j++) {
+
+            for (int startY = j - paddingHeight; startY < j - paddingHeight + kernelHeight; startY++) {
+                if (startY < 0 || startY > src.cols - 1) {
+                    continue;
+                } else {
+                    dst.at<Vec3f>(i, j)[0] += buf.at<Vec3f>(i, startY)[0];
+                    dst.at<Vec3f>(i, j)[1] += buf.at<Vec3f>(i, startY)[1];
+                    dst.at<Vec3f>(i, j)[2] += buf.at<Vec3f>(i, startY)[2];
+                }
+            }
+
+        }
+    }
+
+    for (int i = 0; i < src.rows; i++) {
+        for (int j = 0; j < src.cols; j++) {
+
+            dst.at<Vec3f>(i, j)[0] /= kernelSize;
+            dst.at<Vec3f>(i, j)[1] /= kernelSize;
+            dst.at<Vec3f>(i, j)[2] /= kernelSize;
+
+        }
+    }
 }
 
 int main() {
@@ -44,30 +110,26 @@ int main() {
 
     vector<Mat> bgr;
     split(img, bgr);
+//    curveTransform(bgr[0], lookupTable);
+//    curveTransform(bgr[1], lookupTable);
     curveTransform(bgr[2], lookupTable);
     merge(bgr, img);
 
-    Mat halo(img.rows, img.cols, CV_32FC3);
+    Mat lightCircle(img.rows, img.cols, CV_32FC3);
+    drawCircle(lightCircle, img.cols / 3);
+    Mat halo(lightCircle.rows, lightCircle.cols, CV_32FC3);
+    boxFiltering(lightCircle, halo, img.cols / 2, img.cols / 2);
 
-        // Create Lookup table for color curve effect
-    Mat lut(1, 256, CV_8UC1);
-    for (int i = 0; i < 256; i++)
-    {
-        float x = (float)i / 256.0;
-        lut.at<uchar>(i) = cvRound(256 * (1 / (1 + pow(exp(1.0), -((x - 0.5) / 0.1)))));
-    }
+    cout << img.type() << endl;
 
-    // Split the image channels and apply curve transform only to red channel
-    Mat res;
-    vector<Mat> bgr2;
-    split(img, bgr2);
-    LUT(bgr2[2], lut, bgr2[2]);
-    merge(bgr2, res);
-    Mat halo2(img.rows, img.cols, CV_32FC3, Scalar(0.3, 0.3, 0.3));
-    circle(halo2, Point(img.cols / 2, img.rows / 2), img.cols / 3, Scalar(1, 1, 1), -1);
+    Mat temp;
+    img.convertTo(temp, CV_32FC3);
+    multiply(temp, halo, temp); // temp = temp * halo
+    Mat result;
+    temp.convertTo(result, CV_8UC3);
 
     // show result
-    imshow("my impl", img);
-    imshow("impl", res);
+    imshow("my impl", result);
+//    imshow("impl", res);
     waitKey(0);
 }

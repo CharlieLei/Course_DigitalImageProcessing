@@ -4,7 +4,6 @@ using namespace std;
 
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
-#include <opencv2/imgproc.hpp>
 
 using namespace cv;
 
@@ -115,12 +114,11 @@ int main() {
     curveTransform(bgr[2], lookupTable);
     merge(bgr, img);
 
+    // 绘制光晕
     Mat lightCircle(img.rows, img.cols, CV_32FC3);
     drawCircle(lightCircle, img.cols / 3);
     Mat halo(lightCircle.rows, lightCircle.cols, CV_32FC3);
     boxFiltering(lightCircle, halo, img.cols / 2, img.cols / 2);
-
-    cout << img.type() << endl;
 
     Mat temp;
     img.convertTo(temp, CV_32FC3);
@@ -128,8 +126,6 @@ int main() {
     Mat result;
     temp.convertTo(result, CV_8UC3);
 
-    // show result
-    imshow("my impl", result);
-//    imshow("impl", res);
+    imshow("Lomo Filter", result);
     waitKey(0);
 }

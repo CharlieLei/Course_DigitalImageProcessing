@@ -97,9 +97,19 @@ void boxFiltering(Mat &src, Mat &dst, int kernelWidth, int kernelHeight) {
 }
 
 int main() {
-    Mat img = imread("../lenna.png");
+    String filepath;
+    String outputPath;
+    cout << "filepath:[data/lenna.png] ";
+    getline(cin, filepath);
+    cout << "output file path:[newimage.png] ";
+    getline(cin, outputPath);
+
+    filepath = filepath.empty()? "data/lenna.png": filepath;
+    outputPath = outputPath.empty()? "newimage.png": outputPath;
+
+    Mat img = imread(filepath);
     if (img.empty()) {
-        cerr << "Error" << endl;
+        cerr << "Error:: image file " << filepath  << " cannot open" << endl;
         return -1;
     }
 
@@ -116,15 +126,18 @@ int main() {
 
     // 绘制光晕
     Mat lightCircle(img.rows, img.cols, CV_32FC3);
-    drawCircle(lightCircle, img.cols / 3);
+    drawCircle(lightCircle, fmin(img.rows, img.cols) / 3);
     Mat halo(lightCircle.rows, lightCircle.cols, CV_32FC3);
-    boxFiltering(lightCircle, halo, img.cols / 2, img.cols / 2);
+    boxFiltering(lightCircle, halo,
+                 min(img.rows, img.cols) / 2, min(img.rows, img.cols) / 2);
 
     Mat temp;
     img.convertTo(temp, CV_32FC3);
     multiply(temp, halo, temp); // temp = temp * halo
     Mat result;
     temp.convertTo(result, CV_8UC3);
+
+    imwrite(outputPath, result);
 
     imshow("Lomo Filter", result);
     waitKey(0);

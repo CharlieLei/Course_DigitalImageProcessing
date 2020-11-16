@@ -1,5 +1,44 @@
 # 图像滤镜效果实现
 
+## 一、人像美肤
+
+### 1.1 运行环境
+
+- OpenCV 4.5.0
+
+
+
+### 1.2 运行步骤
+
+1. 在控制台输入``cd SkinFilter``
+2. 输入``./SkinFilter.exe``
+3. 输入图片的路径，默认为``data``文件中的``lenna.png``
+4. 默认在``SkinFilter``文件夹输出结果图像``newimage.png``
+5. 在``SkinFilter``文件夹输出原图像与结果图像之间的差异``difference.png``
+
+
+
+### 1.3 算法原理
+
+首先程序调用``detectFaces``函数检测图像中人脸的位置。该函数使用opencv提供的预训练模型进行检测。模型存放在``SkinFilter/haarcascade_frontalface_default.xml``文件中。函数返回一个``Rect``数组，每个``Rect``记录某个包围人脸的矩形的x和y坐标以及其宽高。
+
+```c++
+void detectFaces(Mat &img, vector<Rect> &faces, String &classifierPath) {
+    Mat gray;
+    cvtColor(img, gray, COLOR_BGR2GRAY);
+    CascadeClassifier classifier;
+    classifier.detectMultiScale(gray, faces);
+}
+```
+
+然后程序在每个人脸矩形区域进行双边滤波。
+
+双边滤波同时考虑空域信息和灰度相似性，从而能够更好的保存图像的边缘信息。其公式如下：
+
+
+
+
+
 ## 二、LOMO滤镜
 
 ### 2.1 运行环境

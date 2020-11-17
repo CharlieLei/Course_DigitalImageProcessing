@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.17)
 project(LomoFilter)
 
 set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_EXE_LINKER_FLAGS -static)
 
 # Where to find CMake modules and OpenCV
 set(OpenCV_DIR "D:\\OpenCV\\mingwbuild")
@@ -18,4 +17,4 @@ add_executable(LomoFilter main.cpp)
 set(OpenCV_LIBS opencv_core opencv_highgui)
 
 # linking
-target_link_libraries(LomoFilter ${OpenCV_LIBS})
+target_link_libraries(LomoFilter ${OpenCV_LIBS} "--static")

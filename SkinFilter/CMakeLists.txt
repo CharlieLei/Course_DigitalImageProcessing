@@ -17,4 +17,4 @@ add_executable(SkinFilter main.cpp)
 set(OpenCV_LIBS opencv_core opencv_imgproc opencv_highgui opencv_imgcodecs opencv_objdetect)
 
 # linking
-target_link_libraries(SkinFilter ${OpenCV_LIBS})
+target_link_libraries(SkinFilter ${OpenCV_LIBS} "-static")

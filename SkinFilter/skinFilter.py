@@ -22,40 +22,40 @@ def bilateral_filtering(src, face, kernel_size, sigma_i, sigma_s):
     [x, y, width, height] = face
     dst = np.copy(src)
 
-    for originalX in range(x, x + width):
-        print('  start processing column ' + str(originalX) + '| end: ' + str(x + width - 1))
-        for originalY in range(y, y + height):
+    for original_x in range(x, x + width):
+        print('  start processing column ' + str(original_x) + '| end: ' + str(x + width - 1))
+        for original_y in range(y, y + height):
 
             # 开始卷积
             i_filtered = np.zeros(3)
             w_p = np.zeros(3)
             for convX in range(kernel_size):
                 for convY in range(kernel_size):
-                    neighbor_x = int(originalX - (kernel_size / 2 - convX))
-                    neighbor_y = int(originalY - (kernel_size / 2 - convY))
+                    neighbor_x = int(original_x - (kernel_size / 2 - convX))
+                    neighbor_y = int(original_y - (kernel_size / 2 - convY))
 
                     # 防止越界
                     if 0 <= neighbor_x <= src.shape[0] - 1 and 0 <= neighbor_y <= src.shape[1] - 1:
                         for channel in range(3):
                             # range kernel
-                            fr = gaussian(
-                                float(src[neighbor_x][neighbor_y][channel]) - float(src[originalX][originalY][channel]),
-                                sigma_i)
+                            fr = gaussian(float(src[neighbor_x][neighbor_y][channel]) -
+                                          float(src[original_x][original_y][channel]),
+                                          sigma_i)
                             # spatial kernel
-                            gs = gaussian(distance(originalX, originalY, neighbor_x, neighbor_y), sigma_s)
+                            gs = gaussian(distance(original_x, original_y, neighbor_x, neighbor_y), sigma_s)
                             w = fr * gs
                             i_filtered[channel] += src[neighbor_x][neighbor_y][channel] * w
                             w_p[channel] += w
 
             i_filtered /= w_p
-            dst[originalX][originalY] = i_filtered.astype(np.uint8)
+            dst[original_x][original_y] = i_filtered
 
-    return dst
+    return dst.astype(np.uint8)
 
 
 def main():
-    filepath = ''  # input('filepath:[data/lenna.png] ')
-    output_path = ''  # input('output file path:[newimage.png] ')
+    filepath = input('filepath:[data/lenna.png] ')
+    output_path = input('output file path:[newimage.png] ')
 
     filepath = 'data/lenna.png' if filepath == '' else filepath
     output_path = 'newimage.png' if output_path == '' else output_path

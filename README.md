@@ -105,7 +105,8 @@ $$
 3. 输入图片的路径，默认为``data``文件中的``lenna.png``
 4. 默认在``LomoFilter``文件夹输出结果图像``newimage.png``
 
-
+http://zihua.li/2014/06/implement-instagram-like-filters/
+https://xta0.me/2013/11/20/iOS-Lomo-Effect.html
 
 ### 2.3 算法原理
 

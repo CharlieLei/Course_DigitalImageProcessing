@@ -142,7 +142,7 @@ $$
 1 \\
 \end{matrix}
 \right] 
-\times
+\cdot
 \left[
 \begin{matrix}
 1 & 1 & 1 \\

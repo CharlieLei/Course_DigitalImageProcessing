@@ -40,6 +40,7 @@ def vignetting_filtering(src, sigma):
             temp = gaussian(distance((i, j), center), sigma)
             mask[i][j] = np.array([temp, temp, temp])
 
+    # cv2.imshow('mask', mask)
     dst = overlay(src / 255, mask)
     return dst.astype(np.uint8)
 
@@ -77,10 +78,10 @@ def main():
     new_img = np.copy(img)
     print('Start:: vignette image')
     vignetting = vignetting_filtering(new_img, new_img.shape[0] / 3)
-    # cv2.imshow('vignetting', result)
+    # cv2.imshow('vignetting', vignetting)
     print('Start:: stretch image contrast')
     lomography = contrast_stretching(vignetting)
-    # cv2.imshow('contrast_stretching', result)
+    # cv2.imshow('contrast_stretching', lomography)
     
     cv2.imshow('lomography', lomography)
     cv2.imwrite(output_path, lomography)
